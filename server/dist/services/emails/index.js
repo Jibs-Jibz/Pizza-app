@@ -8,11 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.sendVerificationMail = exports.mailer = void 0;
 const path = require("path");
 const nodemailer = require("nodemailer");
 const hbs = require("nodemailer-express-handlebars");
 // initailize nodemailer transport
-const mailer = nodemailer.createTransport({
+exports.mailer = nodemailer.createTransport({
     host: "smtp.gmail.com",
     secure: true,
     auth: {
@@ -32,7 +34,7 @@ const handlebarOptions = {
     viewPath: templatesDir,
     extName: ".html",
 };
-mailer.use("compile", hbs(handlebarOptions));
+exports.mailer.use("compile", hbs(handlebarOptions));
 /**
  *
  * @param {string} email - the recipients email
@@ -41,7 +43,7 @@ mailer.use("compile", hbs(handlebarOptions));
  */
 const sendVerificationMail = (email, link) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield mailer.sendMail({
+        const result = yield exports.mailer.sendMail({
             from: "Node app",
             to: email,
             subject: "Verify your mail",
@@ -57,8 +59,9 @@ const sendVerificationMail = (email, link) => __awaiter(void 0, void 0, void 0, 
         return e;
     }
 });
-module.exports = {
-    mailer,
-    sendVerificationMail,
-};
+exports.sendVerificationMail = sendVerificationMail;
+// module.exports = {
+//   mailer,
+//   sendVerificationMail,
+// }
 //# sourceMappingURL=index.js.map

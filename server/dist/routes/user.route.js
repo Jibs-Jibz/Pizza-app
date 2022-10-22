@@ -8,13 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const { Router } = require("express");
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User.model");
-const respond = require("../utils/respond");
+const user_controller_1 = require("../controllers/user.controller");
 const { verifyAuthToken } = require("../middleware/auth.middleware");
 const { signup, login, verifyUser, requestVerificationToken, getUserDetails, } = require("../controllers/user.controller");
-const router = Router();
+const router = (0, express_1.Router)();
 router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const users = yield User.find({});
     res.send(users);
@@ -35,6 +36,7 @@ router.post("/login", login);
 router.post("/verification", verifyUser);
 // /verification/request/?email=test@gmail.com
 router.post("/verification/request", requestVerificationToken);
+router.post('/auth/refresh', verifyAuthToken, user_controller_1.refreshVerificationToken);
 // TODO: implement, update, delete, add validation middleware
 module.exports = router;
 //# sourceMappingURL=user.route.js.map

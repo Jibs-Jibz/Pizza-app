@@ -1,8 +1,9 @@
-const { Router } = require("express")
+import { Router } from "express"
 const jwt = require("jsonwebtoken")
 const User = require("../models/User.model")
-const respond = require("../utils/respond")
 
+import respond from "@utils/respond"
+import { refreshVerificationToken } from "../controllers/user.controller"
 const { verifyAuthToken } = require("../middleware/auth.middleware")
 
 const {
@@ -42,6 +43,7 @@ router.post("/verification", verifyUser)
 // /verification/request/?email=test@gmail.com
 router.post("/verification/request", requestVerificationToken)
 
+router.post('/auth/refresh', verifyAuthToken, refreshVerificationToken)
 // TODO: implement, update, delete, add validation middleware
 
 module.exports = router

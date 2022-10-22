@@ -1,8 +1,7 @@
-const mongoose = require("mongoose")
-const bcrypt = require("bcrypt")
-const jwt = require("jsonwebtoken")
-
-const { sendVerificationMail } = require("../services/emails")
+import mongoose from "mongoose"
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+import { sendVerificationMail } from "../services/emails"
 
 const userSchema = new mongoose.Schema(
   {
@@ -17,7 +16,6 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     password: String,
-    bio: String,
     isAdmin: {
       type: Boolean,
       default: false,
@@ -26,12 +24,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    // accessToken: String, // this is much more better, security wise
-    // refeshToken: String,
-
     tokens: [
       {
-        token: String,
+        accessToken: String,
+        refeshToken: String,
       },
     ], // i will be using this bcuz i am just testing...
   },
@@ -54,18 +50,19 @@ userSchema.methods.toJSON = function () {
 userSchema.methods.generateAuthToken = async function () {
   const user = this
 
-  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET)
+  const accessToken = jwt.sign({ _id: user._id, type: JwtTokenType.auth }, process.env.JWT_SECRET as string)
+  const refeshToken = jwt.sign({ _id: user._id, type: JwtTokenType.refresh }, process.env.JWT_SECRET as string)
 
-  user.tokens = user.tokens.concat({ token })
+  user.tokens = user.tokens.concat({ accessToken, refeshToken })
   await user.save()
 
-  return user
+  return { accessToken, refeshToken }
 }
 
 userSchema.methods.generateVerificationToken = async function () {
   const user = this
-  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: 600, // expire timme is very important for verifications
+  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET as string, {
+    expiresIn: 600, // expire time is very important for verifications
   })
 
   return token
@@ -85,7 +82,7 @@ userSchema.methods.verify = async function () {
 
 userSchema.statics.login = async (credentials) => {
   const { password, ...credential } = credentials // life is not hard (*_*)
-  const user = await User.findOne(credential)
+  const user: any = await User.findOne(credential)
 
   if (!user) {
     throw new Error("pls provide valid credentials")
@@ -98,14 +95,24 @@ userSchema.statics.login = async (credentials) => {
     throw new Error("pls provide valid credentials")
   }
 
-  const token = await user.generateAuthToken()
+  const tokens = await user.generateAuthToken()
   const obscuredUser = user.toJSON()
 
-  return { ...obscuredUser, token }
+  return { ...obscuredUser, ...tokens, }
+}
+
+userSchema.methods.refreshAuthToken = async function () {
+  const user = this
+
+  const tokens = await user.generateAuthToken()
+  const obscuredUser = user.toJSON()
+
+  return { ...obscuredUser, ...tokens, }
+
 }
 
 userSchema.pre("save", async function (next) {
-  const user = this
+  const user: any = this
 
   // hash the password, each time it gets updated
   if (user.isModified("password")) {
@@ -115,4 +122,6 @@ userSchema.pre("save", async function (next) {
 
 const User = mongoose.model("users", userSchema)
 
-module.exports = User
+
+export default User
+// module.exports = User

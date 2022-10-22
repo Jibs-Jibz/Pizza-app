@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  *
  * @param {Object} res Express response object
@@ -15,5 +16,6 @@ const respond = (res, status, message, data = null) => {
         message,
     });
 };
-module.exports = respond;
+exports.default = respond;
+// module.exports = respond;
 //# sourceMappingURL=respond.js.map

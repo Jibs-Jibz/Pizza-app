@@ -3,7 +3,7 @@ const nodemailer = require("nodemailer")
 const hbs = require("nodemailer-express-handlebars")
 
 // initailize nodemailer transport
-const mailer = nodemailer.createTransport({
+export const mailer = nodemailer.createTransport({
   host: "smtp.gmail.com",
   secure: true,
   auth: {
@@ -34,7 +34,7 @@ mailer.use("compile", hbs(handlebarOptions))
  * @param {string} link - the verification url
  * @returns {Promise}
  */
-const sendVerificationMail = async (email, link) => {
+export const sendVerificationMail = async (email, link) => {
   try {
     const result = await mailer.sendMail({
       from: "Node app",
@@ -53,7 +53,7 @@ const sendVerificationMail = async (email, link) => {
   }
 }
 
-module.exports = {
-  mailer,
-  sendVerificationMail,
-}
+// module.exports = {
+//   mailer,
+//   sendVerificationMail,
+// }

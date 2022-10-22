@@ -1,6 +1,6 @@
-const User = require("../models/User.model");
-const jwt = require("jsonwebtoken");
-const respond = require("../utils/respond");
+import jwt, { JwtPayload } from "jsonwebtoken";
+import respond from "../utils/respond";
+import User from '../models/User.model'
 
 const verifyAuthToken = async (req, res, next) => {
     try {
@@ -10,7 +10,9 @@ const verifyAuthToken = async (req, res, next) => {
         if (!token) return respond(res, 403, "Pls Authenticate");
 
         // check if it's valid
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
+
+        if (decoded?.type !== JwtTokenType.auth) return respond(res, 403, "Pls provide a valid token...");
         if (!decoded) return respond(res, 403, "Pls Authenticate");
 
         // check if user exists

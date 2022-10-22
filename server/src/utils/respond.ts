@@ -16,4 +16,6 @@ const respond = (res, status, message, data = null) => {
     });
 };
 
-module.exports = respond;
+
+export default respond
+// module.exports = respond;

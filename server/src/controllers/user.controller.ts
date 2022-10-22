@@ -1,14 +1,11 @@
-const jwt = require("jsonwebtoken");
-const Post = require("../models/Post.model");
-const User = require("../models/User.model");
-const respond = require("../utils/respond");
+import jwt from "jsonwebtoken";
+import User from "../models/User.model";
+import respond from "../utils/respond";
 
-const getUserDetails = async (req, res) => {
+export const getUserDetails = async (req, res) => {
     try {
-        const posts = await Post.find({ username: req.user.username });
-        const userDetails = {
+        const userDetails: any = {
             user: req.user.toJSON(),
-            posts,
         };
 
         respond(res, 200, "Fetched user details", userDetails);
@@ -18,10 +15,10 @@ const getUserDetails = async (req, res) => {
     }
 };
 
-const signup = async (req, res) => {
+export const signup = async (req, res) => {
     try {
-        const credentials = { ...req.body, isVerified: false };
-        const user = User(credentials);
+        const credentials: any = { ...req.body, isVerified: false };
+        const user: any = new User(credentials);
 
         await user.save();
 
@@ -40,7 +37,7 @@ const signup = async (req, res) => {
     }
 };
 
-const login = async (req, res) => {
+export const login = async (req, res) => {
     try {
         const credentials = req.body;
 
@@ -53,7 +50,7 @@ const login = async (req, res) => {
             return respond(res, 403, "Pls verify your account b4 you login"); // this is a custom one for login...
 
         // so if we are here... it means the user is verified, now we can login :)
-        const userDetails = await User.login(credentials);
+        const userDetails = await (User as any).login(credentials);
         respond(res, 200, "successfully logged in", userDetails);
     } catch (e) {
         console.log(e);
@@ -61,7 +58,7 @@ const login = async (req, res) => {
     }
 };
 
-const verifyUser = async (req, res) => {
+export const verifyUser = async (req, res) => {
     try {
         const token = req.query.token;
 
@@ -69,7 +66,7 @@ const verifyUser = async (req, res) => {
         if (!token) return respond(res, 400, "token is required");
 
         // check if it's valid
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
         if (!decoded) return respond(res, 400, "token is required");
 
         const user = await User.findOne({ _id: decoded._id });
@@ -81,7 +78,7 @@ const verifyUser = async (req, res) => {
         user.save();
 
         respond(res, 200, "You have successfully verified your email");
-    } catch (e) {
+    } catch (e: any) {
         if (e.name === "TokenExpiredError")
             return respond(
                 res,
@@ -89,17 +86,17 @@ const verifyUser = async (req, res) => {
                 "Your token has expired, pls request for a new one"
             );
 
-        respond(res, 400, "Unable to verify, Please try again", e);
+        respond(res, 400, "Unable to verify, Please try again");
     }
 };
 
-const requestVerificationToken = async (req, res) => {
+export const requestVerificationToken = async (req, res) => {
     try {
         const email = req.query.email;
 
         if (!email) return respond(res, 400, "the email is required");
 
-        const user = await User.findOne({ email });
+        const user: any = await User.findOne({ email });
         if (!user) return respond(res, 404, "This user does not exist");
 
         await user.verify();
@@ -109,10 +106,28 @@ const requestVerificationToken = async (req, res) => {
     }
 };
 
-module.exports = {
-    signup,
-    login,
-    getUserDetails,
-    verifyUser,
-    requestVerificationToken,
+// users/auth/refresh?token={refreshToken}
+export const refreshVerificationToken = async (req, res) => {
+    try {
+        const user: UserPayload = req.user;
+        const token = req.query?.token;
+
+        const { type, _id }: any = jwt.verify(token, process.env.JWT_SECRET as string);
+
+        if (user._id !== _id)
+            return respond(res, 403, "Pls provide a valid token");
+
+        if (type !== JwtTokenType.refresh)
+            return respond(res, 403, "Pls provide a valid token");
+
+        const refreshedUser = await user.refreshAuthToken();
+
+        respond(res, 200, 'successfully refreshed your token!', refreshedUser)
+    } catch (e: any) {
+        if (e.name === "TokenExpiredError")
+            return respond(res, 400, "Your token has expired, pls login again");
+
+        respond(res, 400, "Unable to refresh, try again later!");
+    }
 };
+
