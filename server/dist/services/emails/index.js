@@ -22,7 +22,8 @@ exports.mailer = nodemailer.createTransport({
         pass: process.env.MAIL_PASSWORD,
     },
 });
-const templatesDir = path.resolve("src/services/emails/templates");
+const templatesDir = path.resolve("public/templates");
+console.log(templatesDir);
 // setup support work passing data into the html file
 // using handlebars, syntax...
 const handlebarOptions = {

@@ -12,7 +12,8 @@ export const mailer = nodemailer.createTransport({
   },
 })
 
-const templatesDir = path.resolve("src/services/emails/templates")
+const templatesDir = path.resolve("public/templates")
+console.log(templatesDir)
 
 // setup support work passing data into the html file
 // using handlebars, syntax...
