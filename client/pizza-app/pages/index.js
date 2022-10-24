@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
-import Layout from '../component/Layout'
+import Layout from '../components/Layout'
 
 
 export default function Home() {
@@ -13,7 +13,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <h1 className='bg-red-900'>
-      Pizza App
+        Pizza App
 
       </h1>
     </div>
