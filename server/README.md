@@ -1,7 +1,9 @@
-# Node Authentication with a mailing service
+# Pizza app
 
-- [x] Authentication
-- [x] Email verification service
+-   [x] Authentication
+-   [x] Email verification service
+-   [ ] Forget password system
+-   [ ] Payment service
 
 ## setup
 

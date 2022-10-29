@@ -1,4 +1,6 @@
 enum JwtTokenType {
         refresh = 'refresh',
-        auth = 'authenticate'
+        auth = 'authenticate',
+        verification = 'verification',
+
 }

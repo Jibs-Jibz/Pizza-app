@@ -10,12 +10,21 @@ const userSchema = new mongoose.Schema(
       unique: true,
       required: true,
     },
+    fullname: {
+      type: String,
+      unique: true,
+      required: true,
+    },
     email: {
       type: String,
       unique: true,
       required: true,
     },
     password: String,
+
+    location: String,
+    phone: String,
+
     isAdmin: {
       type: Boolean,
       default: false,
@@ -61,7 +70,7 @@ userSchema.methods.generateAuthToken = async function () {
 
 userSchema.methods.generateVerificationToken = async function () {
   const user = this
-  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET as string, {
+  const token = jwt.sign({ _id: user._id, type: JwtTokenType.verification }, process.env.JWT_SECRET as string, {
     expiresIn: 600, // expire time is very important for verifications
   })
 

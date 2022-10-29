@@ -2,17 +2,20 @@ import { Router } from "express"
 const jwt = require("jsonwebtoken")
 const User = require("../models/User.model")
 
-import respond from "@utils/respond"
-import { refreshVerificationToken } from "../controllers/user.controller"
+import respond from "../utils/respond"
+import { deleteUser, refreshVerificationToken, requestPasswordReset, resetPassword, updateUser } from "../controllers/user.controller"
 const { verifyAuthToken } = require("../middleware/auth.middleware")
 
-const {
+import {
   signup,
   login,
   verifyUser,
   requestVerificationToken,
   getUserDetails,
-} = require("../controllers/user.controller")
+} from "../controllers/user.controller"
+import { validateRequestResetPassword, validateResetPassword } from "../utils/validators/user.validator"
+import { verifyResetPasswordToken } from "../middleware/auth.middleware"
+import { checkErrors } from "../utils/validators"
 
 const router = Router()
 
@@ -45,5 +48,14 @@ router.post("/verification/request", requestVerificationToken)
 
 router.post('/auth/refresh', verifyAuthToken, refreshVerificationToken)
 // TODO: implement, update, delete, add validation middleware
+router.put('/', verifyAuthToken, updateUser)
+
+router.delete('/', verifyAuthToken, deleteUser)
+
+
+// password reset
+router.post('/auth/reset-password/request', validateRequestResetPassword, checkErrors, requestPasswordReset) // - done
+router.post('/auth/reset-password', verifyResetPasswordToken, validateResetPassword, checkErrors, resetPassword) // - done
+
 
 module.exports = router
