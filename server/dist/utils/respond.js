@@ -17,5 +17,4 @@ const respond = (res, status, message, data = null) => {
     });
 };
 exports.default = respond;
-// module.exports = respond;
 //# sourceMappingURL=respond.js.map

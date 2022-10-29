@@ -53,6 +53,27 @@ export const sendVerificationMail = async (email, link) => {
   }
 }
 
+
+
+export const sendResetPasswordEmail = async ({ email }, link: string) => {
+  try {
+    const result = await mailer.sendMail({
+      from: "John from greenifyafrica",
+      to: email,
+      subject: "Password Reset",
+      template: 'resetpw_mail',
+      context: {
+        link,
+        site_name: 'Greenify Africa',
+      }
+    });
+    return result;
+  } catch (e) {
+    // console.log(e);
+    return e;
+  }
+};
+
 // module.exports = {
 //   mailer,
 //   sendVerificationMail,

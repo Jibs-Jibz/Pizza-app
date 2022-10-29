@@ -12,7 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.refreshVerificationToken = exports.requestVerificationToken = exports.verifyUser = exports.login = exports.signup = exports.getUserDetails = void 0;
+exports.resetPassword = exports.requestPasswordReset = exports.deleteUser = exports.updateUser = exports.refreshVerificationToken = exports.requestVerificationToken = exports.verifyUser = exports.login = exports.signup = exports.getUserDetails = void 0;
+const emails_1 = require("../services/emails");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_model_1 = __importDefault(require("../models/User.model"));
 const respond_1 = __importDefault(require("../utils/respond"));
@@ -35,7 +36,6 @@ const signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const user = new User_model_1.default(credentials);
         yield user.save();
         yield user.verify();
-        res.status(201).send(user);
         (0, respond_1.default)(res, 201, "successfully registered, verification code has been sent to your email", user);
     }
     catch (e) {
@@ -127,4 +127,68 @@ const refreshVerificationToken = (req, res) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.refreshVerificationToken = refreshVerificationToken;
+// updated user validation
+const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const updates = req.body;
+        const user = req.user;
+        const updatedUser = yield User_model_1.default.findByIdAndUpdate(user._id, updates, { new: true });
+        (0, respond_1.default)(res, 200, 'succesfully updated the user', updatedUser);
+    }
+    catch (e) {
+        (0, respond_1.default)(res, 500, "something went wrong");
+    }
+});
+exports.updateUser = updateUser;
+// delete user validation
+const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield req.user.remove();
+        (0, respond_1.default)(res, 200, 'succesfully deleted the user');
+    }
+    catch (e) {
+        (0, respond_1.default)(res, 500, "something went wrong");
+    }
+});
+exports.deleteUser = deleteUser;
+const requestPasswordReset = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // generate a token
+    // send an email to the user... with the url of the frontend which take so url search params
+    // take the email and the mail to it
+    try {
+        const { email } = req.body;
+        const foundUser = yield User_model_1.default.findOne({ email });
+        if (!foundUser)
+            return (0, respond_1.default)(res, 404, "User with this email is not found!");
+        const token = yield foundUser.generateVerificationToken();
+        const clientResetPasswordpath = process.env.GREENIFY_CLIENT_URI_PASSWORD_RESET_PATH;
+        const testResetPasswordpath = 'http://localhost:5000/v2/users/auth/reset-password?token='; // debug
+        /**
+         * clientUrl - should be this pattern
+         * protocol + hostname + {password_reset_path?token=} + {token}
+         * localhost example
+         *                                                  {url}+{token}
+         * {http://localhost:3000/recovery/reset-password/?token=}{token}
+         */
+        const link = `${clientResetPasswordpath}${token}`;
+        const testLink = testResetPasswordpath + token; // debug
+        // await sendResetPasswordEmail(foundUser, testLink)
+        yield (0, emails_1.sendResetPasswordEmail)({ email: foundUser.email }, link);
+        (0, respond_1.default)(res, 200, 'The Password reset link has been sent to you!');
+    }
+    catch (e) {
+        (0, respond_1.default)(res, 500, 'something went wrong');
+    }
+});
+exports.requestPasswordReset = requestPasswordReset;
+const resetPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // validate the token...
+    // get the new input... password
+    // continue to update
+    const { password } = req.body;
+    req.user.password = password;
+    yield req.user.save();
+    (0, respond_1.default)(res, 200, 'successfully retieved your account!', req.user);
+});
+exports.resetPassword = resetPassword;
 //# sourceMappingURL=user.controller.js.map

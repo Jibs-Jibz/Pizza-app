@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendVerificationMail = exports.mailer = void 0;
+exports.sendResetPasswordEmail = exports.sendVerificationMail = exports.mailer = void 0;
 const path = require("path");
 const nodemailer = require("nodemailer");
 const hbs = require("nodemailer-express-handlebars");
@@ -23,7 +23,6 @@ exports.mailer = nodemailer.createTransport({
     },
 });
 const templatesDir = path.resolve("public/templates");
-console.log(templatesDir);
 // setup support work passing data into the html file
 // using handlebars, syntax...
 const handlebarOptions = {
@@ -61,6 +60,26 @@ const sendVerificationMail = (email, link) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.sendVerificationMail = sendVerificationMail;
+const sendResetPasswordEmail = ({ email }, link) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield exports.mailer.sendMail({
+            from: "John from greenifyafrica",
+            to: email,
+            subject: "Password Reset",
+            template: 'resetpw_mail',
+            context: {
+                link,
+                site_name: 'Greenify Africa',
+            }
+        });
+        return result;
+    }
+    catch (e) {
+        // console.log(e);
+        return e;
+    }
+});
+exports.sendResetPasswordEmail = sendResetPasswordEmail;
 // module.exports = {
 //   mailer,
 //   sendVerificationMail,
